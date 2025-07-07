@@ -112,7 +112,7 @@ npm install axios dotenv
 #### Set Your API Key
 
 > **Important:** To have your submissions tracked for the incentivized testnet and earn points, you must use your own unique API key.  
-> ➡️ Request your key here: zkVerify Discord
+> ➡️ Request your key here: [zkVerify Discord](https://discord.gg/zkverify)
 
 Once you have your key, create the environment file by running the two commands below.
 
