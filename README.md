@@ -1,6 +1,6 @@
 # 🔐 zkVerify Automated Proof Submission Guide (Groth16)
 
-✅ A complete, working guide to automatically generate and submit thousands of unique ZK proofs to the zkVerify Incentivized Testnet using Circom, SnarkJS, and a powerful automation script.
+> ✅ A complete, working guide to automatically generate and submit thousands of unique ZK proofs to the [zkVerify Incentivized Testnet](https://points.zkverify.io/loyalty?referral_code=KUO7D211) using Circom, SnarkJS, and a powerful automation script.
 
 This guide provides a full end-to-end workflow, from installing the necessary tools to running a background script that handles everything for you.
 
@@ -10,8 +10,8 @@ This guide provides a full end-to-end workflow, from installing the necessary to
 
 Before you begin, make sure you have the following installed on your server (e.g., a Linux VPS):
 
-- **Node.js:** Version 18+ is required.
-- **API Key:** You'll need an API key from zkVerify. See Step 5 for instructions.
+* **Node.js**: Version 18+ is required.
+* **API Key**: You'll need an API key from zkVerify. See Step 5 for instructions.
 
 ---
 
@@ -21,17 +21,14 @@ Follow these steps to set up the project and start the automation script.
 
 ### Step 1: Install Global Tools
 
-First, install circom and snarkjs globally using npm.
+First, install `circom` and `snarkjs` globally using `npm`.
 
 ```bash
 npm install -g circom
 npm install -g snarkjs
 ```
 
----
-
 ### Step 2: Set Up Project Folders
-
 Create the directory structure for the project.
 
 ```bash
@@ -42,11 +39,8 @@ mkdir zkverify-automator && cd zkverify-automator
 mkdir real-proof data
 ```
 
----
-
 ### Step 3: Create the ZK Circuit
-
-Next, create the simple `sum.circom` circuit file. This circuit will add two numbers, `a` and `b`.
+Next, create the simple sum.circom circuit file. This circuit will add two numbers, a and b.
 
 ```bash
 cat > real-proof/sum.circom <<'EOF'
@@ -62,10 +56,7 @@ component main = SumCircuit();
 EOF
 ```
 
----
-
 ### Step 4: One-Time Key Generation Ceremony
-
 This multi-part step compiles the circuit and performs the trusted setup to generate the necessary proving and verification keys. This only needs to be done once.
 
 ```bash
@@ -92,10 +83,7 @@ snarkjs groth16 setup sum.r1cs pot12_final.ptau sum.zkey
 snarkjs zkey export verificationkey sum.zkey verification_key.json
 ```
 
----
-
 ### Step 5: Prepare API Submission Scripts
-
 Now, create the Node.js script and its configuration files.
 
 ```bash
@@ -110,11 +98,13 @@ npm install axios dotenv
 ```
 
 #### Set Your API Key
+Important: To have your submissions tracked for the incentivized testnet and earn points, you must use your own unique API key.
 
-> **Important:** To have your submissions tracked for the incentivized testnet and earn points, you must use your own unique API key.  
-> ➡️ Request your key here: [zkVerify Discord](https://discord.gg/zkverify)
+➡️ Request your key here: zkVerify Discord
 
 Once you have your key, create the environment file by running the two commands below.
+
+Create the .env file with a placeholder:
 
 ```bash
 echo "API_KEY=YOUR_API_KEY_HERE" > .env
@@ -126,20 +116,17 @@ Edit the file and paste your key:
 nano .env
 ```
 
-Replace `YOUR_API_KEY_HERE` with the actual key you received, then save and exit (`Ctrl+X`, then `Y`, then `Enter`).
+Replace YOUR_API_KEY_HERE with the actual key you received, then save and exit (Ctrl+X, then Y, then Enter).
 
-#### 🧪 For Quick Testing (Optional)
+🧪 For Quick Testing (Optional)
 
-If you just want to run a quick test without your submissions being tracked for points, you can use the default public API key:
+If you just want to run a quick test without your submissions being tracked for points, you can use the default public API key with this single command:
 
 ```bash
 echo "API_KEY=598f259f5f5d7476622ae52677395932fa98901f" > .env
 ```
 
----
-
-#### Create the Node.js Submission Script (`index.js`)
-
+#### Create the Node.js Submission Script (index.js)
 This command creates the script file that sends your proof to the relayer.
 
 ```bash
@@ -149,7 +136,7 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const API_URL = 'https://relayer-api.horizenlabs.io/api/v1';
+const API_URL = '[https://relayer-api.horizenlabs.io/api/v1](https://relayer-api.horizenlabs.io/api/v1)';
 
 const proof = JSON.parse(fs.readFileSync("./data/proof.json"));
 const publicInputs = JSON.parse(fs.readFileSync("./data/public.json"));
@@ -194,15 +181,10 @@ main();
 EOF
 ```
 
----
-
 ### Step 6: Create the Final Automation Script
+This script ties everything together, running the process in a loop to submit many unique proofs. 
 
-This script ties everything together, running the process in a loop to submit many unique proofs.
-
-#### Check for jq
-
-This tool can help parse results, but the final script uses a more basic method. It's still good to have.
+Check for jq:
 
 ```bash
 # Check version
@@ -212,26 +194,26 @@ jq --version
 sudo apt-get update && sudo apt-get install -y jq
 ```
 
-#### Create `automate.sh`:
+Create automate.sh:
 
 ```bash
 cat << 'EOF' > automate.sh
 #!/bin/bash
 
 # --- CONFIGURATION ---
-TOTAL_PROOFS=1000  # Set the total number of proofs to submit
+TOTAL_PROOFS=1000
 LOG_FILE="automation.log"
 CSV_FILE="submissions.csv"
 
 # --- SCRIPT START ---
 
-echo "Starting zkVerify Automation Script..."
+echo "Starting zkVerify Automation Script (curl version)..."
 if [ ! -f "$CSV_FILE" ]; then
     echo "Timestamp,Proof_Number,JobID,TxHash" > $CSV_FILE
 fi
-echo "Results will be saved to $CSV_FILE"
+API_KEY=$(grep API_KEY .env | cut -d '=' -f2)
+API_URL="[https://relayer-api.horizenlabs.io/api/v1](https://relayer-api.horizenlabs.io/api/v1)"
 
-# Move the one-time verification key
 if [ -f "real-proof/verification_key.json" ]; then
     mv real-proof/verification_key.json data/
 fi
@@ -241,37 +223,54 @@ do
     echo "--------------------------------------------------"
     echo "➡️ Starting Proof #$i of $TOTAL_PROOFS at $(date)"
 
-    # Generate and move proof files silently
+    # Generate proof files. This part will be loud and may ask for entropy.
     (cd real-proof && \
      cat > input.json <<EOM
-{
-  "a": "$((RANDOM % 10000))",
-  "b": "$((RANDOM % 10000))"
-}
+{ "a": "$((RANDOM % 10000))", "b": "$((RANDOM % 10000))" }
 EOM
      snarkjs wtns calculate sum.wasm input.json witness.wtns && \
      snarkjs groth16 prove sum.zkey witness.wtns proof.json public.json && \
-     mv proof.json public.json ../data/) &> /dev/null
+     mv proof.json public.json ../data/)
 
-    # Run submission script, capturing both stdout and stderr
-    OUTPUT=$(node index.js 2>&1)
+    # Build the JSON payload using jq
+    JSON_PAYLOAD=$(jq -n \
+      --argjson proof "$(cat data/proof.json)" \
+      --argjson public "$(cat data/public.json)" \
+      --argjson vk "$(cat data/verification_key.json)" \
+      '{ proofType: "groth16", vkRegistered: false, proofOptions: { library: "snarkjs", curve: "bn128" }, proofData: { proof: $proof, publicSignals: $public, vk: $vk } }')
 
-    # Log the raw output
-    echo "--- Run #$i Output ---" >> $LOG_FILE
-    echo "$OUTPUT" >> $LOG_FILE
+    # Submit proof with curl
+    echo "Submitting proof with curl..."
+    SUBMIT_RESPONSE=$(curl -s -X POST \
+      -H "Content-Type: application/json" \
+      -d "$JSON_PAYLOAD" \
+      "${API_URL}/submit-proof/${API_KEY}")
 
-    # Use robust grep and sed for parsing
-    JOB_ID=$(echo "$OUTPUT" | grep -o '"jobId":"[^"]*' | sed 's/"jobId":"//' | head -n 1)
-    TX_HASH=$(echo "$OUTPUT" | grep -o '"txHash":"[^"]*' | sed 's/"txHash":"//')
+    echo "$SUBMIT_RESPONSE" >> $LOG_FILE
+    JOB_ID=$(echo "$SUBMIT_RESPONSE" | jq -r '.jobId')
 
-    if [ -z "$JOB_ID" ]; then JOB_ID="Not Found"; fi
-    if [ -z "$TX_HASH" ]; then TX_HASH="Pending or Failed"; fi
+    if [ -z "$JOB_ID" ] || [ "$JOB_ID" == "null" ]; then
+        echo "❌ Failed to submit proof. See automation.log for details."
+        JOB_ID="Submission Failed"
+        TX_HASH="N/A"
+    else
+        echo "Proof submitted successfully. JobID: $JOB_ID"
+        # Poll for status with curl
+        while true; do
+            STATUS_RESPONSE=$(curl -s "${API_URL}/job-status/${API_KEY}/${JOB_ID}")
+            STATUS=$(echo "$STATUS_RESPONSE" | jq -r '.status')
+            echo "   Polling... Current status: $STATUS"
+            if [ "$STATUS" == "Finalized" ] || [ "$STATUS" == "Failed" ]; then
+                echo "$STATUS_RESPONSE" >> $LOG_FILE
+                TX_HASH=$(echo "$STATUS_RESPONSE" | jq -r '.txHash // "Failed"')
+                break
+            fi
+            sleep 5
+        done
+    fi
 
     echo "✅ Result: JobID = $JOB_ID, TxHash = $TX_HASH"
-
-    # Save results to CSV
     echo "$(date),${i},${JOB_ID},${TX_HASH}" >> $CSV_FILE
-
     echo "Waiting for 30 seconds..."
     sleep 30
 done
@@ -286,15 +285,11 @@ Make the script executable:
 chmod +x automate.sh
 ```
 
----
-
 ## 💻 Running the Automator
-
 You are now ready to start submitting proofs automatically.
 
-### To Start the Script
-
-It's highly recommended to run the script inside a `screen` session, which allows it to continue running even if you disconnect from your server.
+To Start the Script
+It's highly recommended to run the script inside a screen session, which allows it to continue running even if you disconnect from your server.
 
 Start a new screen session:
 
@@ -308,12 +303,9 @@ Run the automation script:
 ./automate.sh
 ```
 
-Detach from the session: To let it run in the background, press `Ctrl+A`, then press the `d` key.
+Detach from the session: To let it run in the background, press Ctrl+A, then press the d key. Note that you may need to re-attach to enter the random text for entropy if prompted.
 
----
-
-### To Check Your Results
-
+To Check Your Results
 Re-attach to the screen to see the live output at any time:
 
 ```bash
@@ -326,14 +318,9 @@ View your collected JobIDs and TxHashes by reading the CSV file:
 cat submissions.csv
 ```
 
----
-
 ## 🏆 Claim Your Points
+Use the jobId or txHash from your submissions.csv file to fill out the official zkVerify submission form to claim your points for the testnet.
 
-Use the jobId or txHash from your `submissions.csv` file to fill out the official zkVerify submission form to claim your points for the testnet.
-
-➡️ [Submission Form](https://forms.gle/PVjhLkDt2TbgmspGA)
-
----
+➡️ Submission Form: https://forms.gle/PVjhLkDt2TbgmspGA
 
 Good luck!
